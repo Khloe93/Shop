@@ -1,0 +1,14 @@
+package com.mall.Shop.repository;
+
+import com.mall.Shop.dto.ItemSearchDto;
+import com.mall.Shop.dto.MainItemDto;
+import com.mall.Shop.entity.Item;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+
+public interface ItemRepositoryCustom {
+
+    Page<Item> getAdminItemPage(ItemSearchDto itemSearchDto, Pageable pageable);
+
+   Page<MainItemDto> getMainItemPage(ItemSearchDto itemSearchDto, Pageable pageable);
+}
