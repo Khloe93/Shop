@@ -2,15 +2,17 @@ package com.mall.Shop.service;
 
 
 import com.mall.Shop.dto.OrderDto;
-import com.mall.Shop.entity.Item;
-import com.mall.Shop.entity.Member;
-import com.mall.Shop.entity.Order;
-import com.mall.Shop.entity.OrderItem;
+import com.mall.Shop.dto.OrderHistDto;
+import com.mall.Shop.dto.OrderItemDto;
+import com.mall.Shop.entity.*;
 import com.mall.Shop.repository.ItemImgRepository;
 import com.mall.Shop.repository.ItemRepository;
 import com.mall.Shop.repository.MemberRepository;
 import com.mall.Shop.repository.OrderRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.thymeleaf.util.StringUtils;
@@ -87,4 +89,27 @@ public class OrderService {
 
         return order.getId();
     }
+
+    @Transactional(readOnly = true)
+    public Page<OrderHistDto> getOrderList(String email, Pageable pageable){
+        List<Order> orders = orderRepository.findOrders(email,pageable);
+        Long totalCount = orderRepository.countOrder(email);
+        List<OrderHistDto> orderHistDtos = new ArrayList<>();
+
+        for(Order order : orders){
+            OrderHistDto orderHistDto = new OrderHistDto(order);
+            List<OrderItem> orderItems = order.getOrderItems();
+            for(OrderItem orderItem : orderItems){
+                ItemImg itemImg = itemImgRepository.findByItemIdAndRepimgYn(orderItem.getItem().getId(),"Y");
+                OrderItemDto orderItemDto=
+                        new OrderItemDto(orderItem, itemImg.getImgUrl());
+                orderHistDto.addOrderItemDto(orderItemDto);
+            }
+            orderHistDtos.add(orderHistDto);
+        }
+        return new PageImpl<OrderHistDto>(orderHistDtos, pageable, totalCount);
+    }
+
+
+
 }
